@@ -199,311 +199,35 @@
     };
 
     chroma.Color = Color_1;
-    chroma.version = '2.1.0';
+    chroma.version = '2.1.1';
 
     var chroma_1 = chroma;
 
     var unpack$1 = utils.unpack;
     var last$2 = utils.last;
-    var rnd = function (a) { return Math.round(a*100)/100; };
-
-    /*
-     * supported arguments:
-     * - hsl2css(h,s,l)
-     * - hsl2css(h,s,l,a)
-     * - hsl2css([h,s,l], mode)
-     * - hsl2css([h,s,l,a], mode)
-     * - hsl2css({h,s,l,a}, mode)
-     */
-    var hsl2css = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        var hsla = unpack$1(args, 'hsla');
-        var mode = last$2(args) || 'lsa';
-        hsla[0] = rnd(hsla[0] || 0);
-        hsla[1] = rnd(hsla[1]*100) + '%';
-        hsla[2] = rnd(hsla[2]*100) + '%';
-        if (mode === 'hsla' || (hsla.length > 3 && hsla[3]<1)) {
-            hsla[3] = hsla.length > 3 ? hsla[3] : 1;
-            mode = 'hsla';
-        } else {
-            hsla.length = 3;
-        }
-        return (mode + "(" + (hsla.join(',')) + ")");
-    };
-
-    var hsl2css_1 = hsl2css;
-
-    var unpack$2 = utils.unpack;
-
-    /*
-     * supported arguments:
-     * - rgb2hsl(r,g,b)
-     * - rgb2hsl(r,g,b,a)
-     * - rgb2hsl([r,g,b])
-     * - rgb2hsl([r,g,b,a])
-     * - rgb2hsl({r,g,b,a})
-     */
-    var rgb2hsl = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        args = unpack$2(args, 'rgba');
-        var r = args[0];
-        var g = args[1];
-        var b = args[2];
-
-        r /= 255;
-        g /= 255;
-        b /= 255;
-
-        var min = Math.min(r, g, b);
-        var max = Math.max(r, g, b);
-
-        var l = (max + min) / 2;
-        var s, h;
-
-        if (max === min){
-            s = 0;
-            h = Number.NaN;
-        } else {
-            s = l < 0.5 ? (max - min) / (max + min) : (max - min) / (2 - max - min);
-        }
-
-        if (r == max) { h = (g - b) / (max - min); }
-        else if (g == max) { h = 2 + (b - r) / (max - min); }
-        else if (b == max) { h = 4 + (r - g) / (max - min); }
-
-        h *= 60;
-        if (h < 0) { h += 360; }
-        if (args.length>3 && args[3]!==undefined) { return [h,s,l,args[3]]; }
-        return [h,s,l];
-    };
-
-    var rgb2hsl_1 = rgb2hsl;
-
-    var unpack$3 = utils.unpack;
-    var last$3 = utils.last;
-
-
     var round = Math.round;
-
-    /*
-     * supported arguments:
-     * - rgb2css(r,g,b)
-     * - rgb2css(r,g,b,a)
-     * - rgb2css([r,g,b], mode)
-     * - rgb2css([r,g,b,a], mode)
-     * - rgb2css({r,g,b,a}, mode)
-     */
-    var rgb2css = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        var rgba = unpack$3(args, 'rgba');
-        var mode = last$3(args) || 'rgb';
-        if (mode.substr(0,3) == 'hsl') {
-            return hsl2css_1(rgb2hsl_1(rgba), mode);
-        }
-        rgba[0] = round(rgba[0]);
-        rgba[1] = round(rgba[1]);
-        rgba[2] = round(rgba[2]);
-        if (mode === 'rgba' || (rgba.length > 3 && rgba[3]<1)) {
-            rgba[3] = rgba.length > 3 ? rgba[3] : 1;
-            mode = 'rgba';
-        }
-        return (mode + "(" + (rgba.slice(0,mode==='rgb'?3:4).join(',')) + ")");
-    };
-
-    var rgb2css_1 = rgb2css;
-
-    var unpack$4 = utils.unpack;
-    var round$1 = Math.round;
-
-    var hsl2rgb = function () {
-        var assign;
-
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-        args = unpack$4(args, 'hsl');
-        var h = args[0];
-        var s = args[1];
-        var l = args[2];
-        var r,g,b;
-        if (s === 0) {
-            r = g = b = l*255;
-        } else {
-            var t3 = [0,0,0];
-            var c = [0,0,0];
-            var t2 = l < 0.5 ? l * (1+s) : l+s-l*s;
-            var t1 = 2 * l - t2;
-            var h_ = h / 360;
-            t3[0] = h_ + 1/3;
-            t3[1] = h_;
-            t3[2] = h_ - 1/3;
-            for (var i=0; i<3; i++) {
-                if (t3[i] < 0) { t3[i] += 1; }
-                if (t3[i] > 1) { t3[i] -= 1; }
-                if (6 * t3[i] < 1)
-                    { c[i] = t1 + (t2 - t1) * 6 * t3[i]; }
-                else if (2 * t3[i] < 1)
-                    { c[i] = t2; }
-                else if (3 * t3[i] < 2)
-                    { c[i] = t1 + (t2 - t1) * ((2 / 3) - t3[i]) * 6; }
-                else
-                    { c[i] = t1; }
-            }
-            (assign = [round$1(c[0]*255),round$1(c[1]*255),round$1(c[2]*255)], r = assign[0], g = assign[1], b = assign[2]);
-        }
-        if (args.length > 3) {
-            // keep alpha channel
-            return [r,g,b,args[3]];
-        }
-        return [r,g,b,1];
-    };
-
-    var hsl2rgb_1 = hsl2rgb;
-
-    var RE_RGB = /^rgb\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/;
-    var RE_RGBA = /^rgba\(\s*(-?\d+),\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*([01]|[01]?\.\d+)\)$/;
-    var RE_RGB_PCT = /^rgb\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
-    var RE_RGBA_PCT = /^rgba\(\s*(-?\d+(?:\.\d+)?)%,\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
-    var RE_HSL = /^hsl\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*\)$/;
-    var RE_HSLA = /^hsla\(\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)%\s*,\s*(-?\d+(?:\.\d+)?)%\s*,\s*([01]|[01]?\.\d+)\)$/;
-
-    var round$2 = Math.round;
-
-    var css2rgb = function (css) {
-        css = css.toLowerCase().trim();
-        var m;
-
-        // rgb(250,20,0)
-        if ((m = css.match(RE_RGB))) {
-            var rgb = m.slice(1,4);
-            for (var i=0; i<3; i++) {
-                rgb[i] = +rgb[i];
-            }
-            rgb[3] = 1;  // default alpha
-            return rgb;
-        }
-
-        // rgba(250,20,0,0.4)
-        if ((m = css.match(RE_RGBA))) {
-            var rgb$1 = m.slice(1,5);
-            for (var i$1=0; i$1<4; i$1++) {
-                rgb$1[i$1] = +rgb$1[i$1];
-            }
-            return rgb$1;
-        }
-
-        // rgb(100%,0%,0%)
-        if ((m = css.match(RE_RGB_PCT))) {
-            var rgb$2 = m.slice(1,4);
-            for (var i$2=0; i$2<3; i$2++) {
-                rgb$2[i$2] = round$2(rgb$2[i$2] * 2.55);
-            }
-            rgb$2[3] = 1;  // default alpha
-            return rgb$2;
-        }
-
-        // rgba(100%,0%,0%,0.4)
-        if ((m = css.match(RE_RGBA_PCT))) {
-            var rgb$3 = m.slice(1,5);
-            for (var i$3=0; i$3<3; i$3++) {
-                rgb$3[i$3] = round$2(rgb$3[i$3] * 2.55);
-            }
-            rgb$3[3] = +rgb$3[3];
-            return rgb$3;
-        }
-
-        // hsl(0,100%,50%)
-        if ((m = css.match(RE_HSL))) {
-            var hsl = m.slice(1,4);
-            hsl[1] *= 0.01;
-            hsl[2] *= 0.01;
-            var rgb$4 = hsl2rgb_1(hsl);
-            rgb$4[3] = 1;
-            return rgb$4;
-        }
-
-        // hsla(0,100%,50%,0.5)
-        if ((m = css.match(RE_HSLA))) {
-            var hsl$1 = m.slice(1,4);
-            hsl$1[1] *= 0.01;
-            hsl$1[2] *= 0.01;
-            var rgb$5 = hsl2rgb_1(hsl$1);
-            rgb$5[3] = +m[4];  // default alpha = 1
-            return rgb$5;
-        }
-    };
-
-    css2rgb.test = function (s) {
-        return RE_RGB.test(s) ||
-            RE_RGBA.test(s) ||
-            RE_RGB_PCT.test(s) ||
-            RE_RGBA_PCT.test(s) ||
-            RE_HSL.test(s) ||
-            RE_HSLA.test(s);
-    };
-
-    var css2rgb_1 = css2rgb;
-
-    var type$2 = utils.type;
-
-
-
-
-    Color_1.prototype.css = function(mode) {
-        return rgb2css_1(this._rgb, mode);
-    };
-
-    chroma_1.css = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['css']) ));
-    };
-
-    input.format.css = css2rgb_1;
-
-    input.autodetect.push({
-        p: 5,
-        test: function (h) {
-            var rest = [], len = arguments.length - 1;
-            while ( len-- > 0 ) rest[ len ] = arguments[ len + 1 ];
-
-            if (!rest.length && type$2(h) === 'string' && css2rgb_1.test(h)) {
-                return 'css';
-            }
-        }
-    });
-
-    var unpack$5 = utils.unpack;
-    var last$4 = utils.last;
-    var round$3 = Math.round;
 
     var rgb2hex = function () {
         var args = [], len = arguments.length;
         while ( len-- ) args[ len ] = arguments[ len ];
 
-        var ref = unpack$5(args, 'rgba');
+        var ref = unpack$1(args, 'rgba');
         var r = ref[0];
         var g = ref[1];
         var b = ref[2];
         var a = ref[3];
-        var mode = last$4(args) || 'auto';
+        var mode = last$2(args) || 'auto';
         if (a === undefined) { a = 1; }
         if (mode === 'auto') {
             mode = a < 1 ? 'rgba' : 'rgb';
         }
-        r = round$3(r);
-        g = round$3(g);
-        b = round$3(b);
+        r = round(r);
+        g = round(g);
+        b = round(b);
         var u = r << 16 | g << 8 | b;
         var str = "000000" + u.toString(16); //#.toUpperCase();
         str = str.substr(str.length - 6);
-        var hxa = '0' + round$3(a * 255).toString(16);
+        var hxa = '0' + round(a * 255).toString(16);
         hxa = hxa.substr(hxa.length - 2);
         switch (mode.toLowerCase()) {
             case 'rgba': return ("#" + str + hxa);
@@ -563,7 +287,7 @@
 
     var hex2rgb_1 = hex2rgb;
 
-    var type$3 = utils.type;
+    var type$2 = utils.type;
 
 
 
@@ -586,45 +310,75 @@
             var rest = [], len = arguments.length - 1;
             while ( len-- > 0 ) rest[ len ] = arguments[ len + 1 ];
 
-            if (!rest.length && type$3(h) === 'string' && [3,4,5,6,7,8,9].indexOf(h.length) >= 0) {
+            if (!rest.length && type$2(h) === 'string' && [3,4,5,6,7,8,9].indexOf(h.length) >= 0) {
                 return 'hex';
             }
         }
     });
 
-    var unpack$6 = utils.unpack;
-    var type$4 = utils.type;
+    var unpack$2 = utils.unpack;
+    var type$3 = utils.type;
+    var round$1 = Math.round;
 
+    Color_1.prototype.rgb = function(rnd) {
+        if ( rnd === void 0 ) rnd=true;
 
-
-
-
-
-    Color_1.prototype.hsl = function() {
-        return rgb2hsl_1(this._rgb);
+        if (rnd === false) { return this._rgb.slice(0,3); }
+        return this._rgb.slice(0,3).map(round$1);
     };
 
-    chroma_1.hsl = function () {
+    Color_1.prototype.rgba = function(rnd) {
+        if ( rnd === void 0 ) rnd=true;
+
+        return this._rgb.slice(0,4).map(function (v,i) {
+            return i<3 ? (rnd === false ? v : round$1(v)) : v;
+        });
+    };
+
+    chroma_1.rgb = function () {
         var args = [], len = arguments.length;
         while ( len-- ) args[ len ] = arguments[ len ];
 
-        return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['hsl']) ));
+        return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['rgb']) ));
     };
 
-    input.format.hsl = hsl2rgb_1;
+    input.format.rgb = function () {
+        var args = [], len = arguments.length;
+        while ( len-- ) args[ len ] = arguments[ len ];
+
+        var rgba = unpack$2(args, 'rgba');
+        if (rgba[3] === undefined) { rgba[3] = 1; }
+        return rgba;
+    };
 
     input.autodetect.push({
-        p: 2,
+        p: 3,
         test: function () {
             var args = [], len = arguments.length;
             while ( len-- ) args[ len ] = arguments[ len ];
 
-            args = unpack$6(args, 'hsl');
-            if (type$4(args) === 'array' && args.length === 3) {
-                return 'hsl';
+            args = unpack$2(args, 'rgba');
+            if (type$3(args) === 'array' && (args.length === 3 ||
+                args.length === 4 && type$3(args[3]) == 'number' && args[3] >= 0 && args[3] <= 1)) {
+                return 'rgb';
             }
         }
     });
+
+    var type$4 = utils.type;
+
+    Color_1.prototype.alpha = function(a, mutate) {
+        if ( mutate === void 0 ) mutate=false;
+
+        if (a !== undefined && type$4(a) === 'number') {
+            if (mutate) {
+                this._rgb[3] = a;
+                return this;
+            }
+            return new Color_1([this._rgb[0], this._rgb[1], this._rgb[2], a], 'rgb');
+        }
+        return this._rgb[3];
+    };
 
     var labConstants = {
         // Corresponds roughly to RGB brighter/darker
@@ -641,14 +395,14 @@
         t3: 0.008856452,  // t1 * t1 * t1
     };
 
-    var unpack$7 = utils.unpack;
+    var unpack$3 = utils.unpack;
     var pow = Math.pow;
 
     var rgb2lab = function () {
         var args = [], len = arguments.length;
         while ( len-- ) args[ len ] = arguments[ len ];
 
-        var ref = unpack$7(args, 'rgb');
+        var ref = unpack$3(args, 'rgb');
         var r = ref[0];
         var g = ref[1];
         var b = ref[2];
@@ -682,7 +436,7 @@
 
     var rgb2lab_1 = rgb2lab;
 
-    var unpack$8 = utils.unpack;
+    var unpack$4 = utils.unpack;
     var pow$1 = Math.pow;
 
     /*
@@ -694,7 +448,7 @@
         var args = [], len = arguments.length;
         while ( len-- ) args[ len ] = arguments[ len ];
 
-        args = unpack$8(args, 'lab');
+        args = unpack$4(args, 'lab');
         var l = args[0];
         var a = args[1];
         var b = args[2];
@@ -725,7 +479,7 @@
 
     var lab2rgb_1 = lab2rgb;
 
-    var unpack$9 = utils.unpack;
+    var unpack$5 = utils.unpack;
     var type$5 = utils.type;
 
 
@@ -752,76 +506,12 @@
             var args = [], len = arguments.length;
             while ( len-- ) args[ len ] = arguments[ len ];
 
-            args = unpack$9(args, 'lab');
+            args = unpack$5(args, 'lab');
             if (type$5(args) === 'array' && args.length === 3) {
                 return 'lab';
             }
         }
     });
-
-    var unpack$a = utils.unpack;
-    var type$6 = utils.type;
-    var round$4 = Math.round;
-
-    Color_1.prototype.rgb = function(rnd) {
-        if ( rnd === void 0 ) rnd=true;
-
-        if (rnd === false) { return this._rgb.slice(0,3); }
-        return this._rgb.slice(0,3).map(round$4);
-    };
-
-    Color_1.prototype.rgba = function(rnd) {
-        if ( rnd === void 0 ) rnd=true;
-
-        return this._rgb.slice(0,4).map(function (v,i) {
-            return i<3 ? (rnd === false ? v : round$4(v)) : v;
-        });
-    };
-
-    chroma_1.rgb = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        return new (Function.prototype.bind.apply( Color_1, [ null ].concat( args, ['rgb']) ));
-    };
-
-    input.format.rgb = function () {
-        var args = [], len = arguments.length;
-        while ( len-- ) args[ len ] = arguments[ len ];
-
-        var rgba = unpack$a(args, 'rgba');
-        if (rgba[3] === undefined) { rgba[3] = 1; }
-        return rgba;
-    };
-
-    input.autodetect.push({
-        p: 3,
-        test: function () {
-            var args = [], len = arguments.length;
-            while ( len-- ) args[ len ] = arguments[ len ];
-
-            args = unpack$a(args, 'rgba');
-            if (type$6(args) === 'array' && (args.length === 3 ||
-                args.length === 4 && type$6(args[3]) == 'number' && args[3] >= 0 && args[3] <= 1)) {
-                return 'rgb';
-            }
-        }
-    });
-
-    var type$7 = utils.type;
-
-    Color_1.prototype.alpha = function(a, mutate) {
-        if ( mutate === void 0 ) mutate=false;
-
-        if (a !== undefined && type$7(a) === 'number') {
-            if (mutate) {
-                this._rgb[3] = a;
-                return this;
-            }
-            return new Color_1([this._rgb[0], this._rgb[1], this._rgb[2], a], 'rgb');
-        }
-        return this._rgb[3];
-    };
 
     Color_1.prototype.darken = function(amount) {
     	if ( amount === void 0 ) amount=1;
@@ -855,99 +545,111 @@
         }
     };
 
-    var interpolator = {};
+    var type$6 = utils.type;
+    var pow$2 = Math.pow;
 
-    var type$8 = utils.type;
+    var EPS = 1e-7;
+    var MAX_ITER = 20;
 
-
-    var mix = function (col1, col2, f) {
-        if ( f === void 0 ) f=0.5;
-        var rest = [], len = arguments.length - 3;
-        while ( len-- > 0 ) rest[ len ] = arguments[ len + 3 ];
-
-        var mode = rest[0] || 'lrgb';
-        if (!interpolator[mode] && !rest.length) {
-            // fall back to the first supported mode
-            mode = Object.keys(interpolator)[0];
-        }
-        if (!interpolator[mode]) {
-            throw new Error(("interpolation mode " + mode + " is not defined"));
-        }
-        if (type$8(col1) !== 'object') { col1 = new Color_1(col1); }
-        if (type$8(col2) !== 'object') { col2 = new Color_1(col2); }
-        return interpolator[mode](col1, col2, f)
-            .alpha(col1.alpha() + f * (col2.alpha() - col1.alpha()));
-    };
-
-    Color_1.prototype.mix =
-    Color_1.prototype.interpolate = function(col2, f) {
-    	if ( f === void 0 ) f=0.5;
-    	var rest = [], len = arguments.length - 2;
-    	while ( len-- > 0 ) rest[ len ] = arguments[ len + 2 ];
-
-    	return mix.apply(void 0, [ this, col2, f ].concat( rest ));
-    };
-
-    var type$9 = utils.type;
-
-    Color_1.prototype.set = function(mc, value, mutate) {
-        if ( mutate === void 0 ) mutate=false;
-
-        var ref = mc.split('.');
-        var mode = ref[0];
-        var channel = ref[1];
-        var src = this[mode]();
-        if (channel) {
-            var i = mode.indexOf(channel);
-            if (i > -1) {
-                if (type$9(value) == 'string') {
-                    switch(value.charAt(0)) {
-                        case '+': src[i] += +value; break;
-                        case '-': src[i] += +value; break;
-                        case '*': src[i] *= +(value.substr(1)); break;
-                        case '/': src[i] /= +(value.substr(1)); break;
-                        default: src[i] = +value;
-                    }
-                } else if (type$9(value) === 'number') {
-                    src[i] = value;
-                } else {
-                    throw new Error("unsupported value for Color.set");
-                }
-                var out = new Color_1(src, mode);
-                if (mutate) {
-                    this._rgb = out._rgb;
-                    return this;
-                }
-                return out;
+    Color_1.prototype.luminance = function(lum) {
+        if (lum !== undefined && type$6(lum) === 'number') {
+            if (lum === 0) {
+                // return pure black
+                return new Color_1([0,0,0,this._rgb[3]], 'rgb');
             }
-            throw new Error(("unknown channel " + channel + " in mode " + mode));
-        } else {
-            return src;
+            if (lum === 1) {
+                // return pure white
+                return new Color_1([255,255,255,this._rgb[3]], 'rgb');
+            }
+            // compute new color using...
+            var cur_lum = this.luminance();
+            var mode = 'rgb';
+            var max_iter = MAX_ITER;
+
+            var test = function (low, high) {
+                var mid = low.interpolate(high, 0.5, mode);
+                var lm = mid.luminance();
+                if (Math.abs(lum - lm) < EPS || !max_iter--) {
+                    // close enough
+                    return mid;
+                }
+                return lm > lum ? test(low, mid) : test(mid, high);
+            };
+
+            var rgb = (cur_lum > lum ? test(new Color_1([0,0,0]), this) : test(this, new Color_1([255,255,255]))).rgb();
+            return new Color_1(rgb.concat( [this._rgb[3]]));
         }
+        return rgb2luminance.apply(void 0, (this._rgb).slice(0,3));
+    };
+
+
+    var rgb2luminance = function (r,g,b) {
+        // relative luminance
+        // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+        r = luminance_x(r);
+        g = luminance_x(g);
+        b = luminance_x(b);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+
+    var luminance_x = function (x) {
+        x /= 255;
+        return x <= 0.03928 ? x/12.92 : pow$2((x+0.055)/1.055, 2.4);
+    };
+
+    var contrast = function (a, b) {
+        // WCAG contrast ratio
+        // see http://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+        a = new Color_1(a);
+        b = new Color_1(b);
+        var l1 = a.luminance();
+        var l2 = b.luminance();
+        return l1 > l2 ? (l1 + 0.05) / (l2 + 0.05) : (l2 + 0.05) / (l1 + 0.05);
     };
 
     var sqrt = Math.sqrt;
-    var pow$2 = Math.pow;
+    var atan2 = Math.atan2;
+    var abs = Math.abs;
+    var cos = Math.cos;
+    var PI$1 = Math.PI;
 
-    var lrgb = function (col1, col2, f) {
-        var ref = col1._rgb;
-        var x1 = ref[0];
-        var y1 = ref[1];
-        var z1 = ref[2];
-        var ref$1 = col2._rgb;
-        var x2 = ref$1[0];
-        var y2 = ref$1[1];
-        var z2 = ref$1[2];
-        return new Color_1(
-            sqrt(pow$2(x1,2) * (1-f) + pow$2(x2,2) * f),
-            sqrt(pow$2(y1,2) * (1-f) + pow$2(y2,2) * f),
-            sqrt(pow$2(z1,2) * (1-f) + pow$2(z2,2) * f),
-            'rgb'
-        )
+    var deltaE = function(a, b, L, C) {
+        if ( L === void 0 ) L=1;
+        if ( C === void 0 ) C=1;
+
+        // Delta E (CMC)
+        // see http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CMC.html
+        a = new Color_1(a);
+        b = new Color_1(b);
+        var ref = Array.from(a.lab());
+        var L1 = ref[0];
+        var a1 = ref[1];
+        var b1 = ref[2];
+        var ref$1 = Array.from(b.lab());
+        var L2 = ref$1[0];
+        var a2 = ref$1[1];
+        var b2 = ref$1[2];
+        var c1 = sqrt((a1 * a1) + (b1 * b1));
+        var c2 = sqrt((a2 * a2) + (b2 * b2));
+        var sl = L1 < 16.0 ? 0.511 : (0.040975 * L1) / (1.0 + (0.01765 * L1));
+        var sc = ((0.0638 * c1) / (1.0 + (0.0131 * c1))) + 0.638;
+        var h1 = c1 < 0.000001 ? 0.0 : (atan2(b1, a1) * 180.0) / PI$1;
+        while (h1 < 0) { h1 += 360; }
+        while (h1 >= 360) { h1 -= 360; }
+        var t = (h1 >= 164.0) && (h1 <= 345.0) ? (0.56 + abs(0.2 * cos((PI$1 * (h1 + 168.0)) / 180.0))) : (0.36 + abs(0.4 * cos((PI$1 * (h1 + 35.0)) / 180.0)));
+        var c4 = c1 * c1 * c1 * c1;
+        var f = sqrt(c4 / (c4 + 1900.0));
+        var sh = sc * (((f * t) + 1.0) - f);
+        var delL = L1 - L2;
+        var delC = c1 - c2;
+        var delA = a1 - a2;
+        var delB = b1 - b2;
+        var dH2 = ((delA * delA) + (delB * delB)) - (delC * delC);
+        var v1 = delL / (L * sl);
+        var v2 = delC / (C * sc);
+        var v3 = sh;
+        return sqrt((v1 * v1) + (v2 * v2) + (dH2 / (v3 * v3)));
     };
-
-    // register interpolator
-    interpolator.lrgb = lrgb;
 
     var valid = function () {
         var args = [], len = arguments.length;
@@ -964,28 +666,15 @@
     // feel free to comment out anything to rollup
     // a smaller chroma.js built
 
-    // io --> convert colors
-
-
-
-
-
-
-    // operators --> modify existing Colors
-
-
-
-
-
-
-    // interpolators
-
-
-    // generators -- > create new colors
-    chroma_1.mix = chroma_1.interpolate = mix;
-
-    // other utility methods
-    chroma_1.valid = valid;
+     //*****
+      //*****
+       //*****
+        //*****
+             //*****
+      //*****
+    chroma_1.contrast = contrast;  //*****
+    chroma_1.deltaE = deltaE;      //*****
+    chroma_1.valid = valid;       //*****
 
     var indexLight = chroma_1;
 
