@@ -1,5 +1,5 @@
 {
-  "name": "chroma-js",
+  "name": "@salvoravida/chroma-js-light",
   "description": "JavaScript library for color conversions",
   "version": "2.1.1",
   "author": "Gregor Aisch",
@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git://github.com/gka/chroma.js.git"
   },
-  "main": "chroma.js",
+  "main": "chroma-light.min.js",
   "scripts": {
     "prepublishOnly": "npm run build && npm test",
     "build": "rollup -c && cross-env DEV=1 rollup -c ",
