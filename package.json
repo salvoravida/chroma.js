@@ -1,5 +1,5 @@
 {
-  "name": "chroma-js",
+  "name": "@metrika/chroma-js-light",
   "description": "JavaScript library for color conversions",
   "version": "2.4.2",
   "author": "Gregor Aisch",
@@ -20,7 +20,7 @@
     "type": "git",
     "url": "git://github.com/gka/chroma.js.git"
   },
-  "main": "chroma.js",
+  "main": "chroma-light-metrika.min.js",
   "scripts": {
     "prepublishOnly": "npm run build && npm test",
     "build": "rollup -c && cross-env DEV=1 rollup -c ",
