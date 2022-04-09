@@ -14,3 +14,4 @@ docs/
 .travis.yml
 Gruntfile.js
 rollup.config.js
+.idea/
